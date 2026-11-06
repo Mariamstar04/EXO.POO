@@ -1,0 +1,75 @@
+<?php
+$message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // 1. Vérification que tous les champs sont remplis
+    if (!empty($_POST['nom']) && isset($_POST['heures']) && isset($_POST['tarif']) && is_numeric($_POST['heures']) && is_numeric($_POST['tarif'])) {
+        
+        $nom = htmlspecialchars($_POST['nom']);
+        $heures = (float)$_POST['heures'];
+        $tarif = (float)$_POST['tarif'];
+
+        // 2. Fonction de calcul
+        function calculSalaire($heures, $tarif) {
+            $salaire_brut = $heures * $tarif;
+            $prime = 0;
+            
+            if ($salaire_brut > 500000) {
+                $prime = $salaire_brut * 0.10; // 10% de prime
+            }
+            
+            $salaire_total = $salaire_brut + $prime;
+            
+            return [
+                'brut' => $salaire_brut,
+                'prime' => $prime,
+                'total' => $salaire_total
+            ];
+        }
+
+        $resultat = calculSalaire($heures, $tarif);
+        
+        // Affichage des résultats
+        $message = "<h3>Fiche de paie pour : $nom</h3>";
+        $message .= "<p><strong>Salaire brut :</strong> " . number_format($resultat['brut'], 0, ',', ' ') . " FCFA</p>";
+        
+        if ($resultat['prime'] > 0) {
+            $message .= "<p><strong>Prime (10%) :</strong> " . number_format($resultat['prime'], 0, ',', ' ') . " FCFA</p>";
+        } else {
+            $message .= "<p><strong>Prime :</strong> Aucune</p>";
+        }
+        
+        $message .= "<p><strong>Salaire total :</strong> " . number_format($resultat['total'], 0, ',', ' ') . " FCFA</p>";
+        
+    } else {
+        $message = "<p style='color:red;'>Veuillez remplir correctement tous les champs.</p>";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Exercice 2 - Salaire</title>
+</head>
+<body>
+    <h2>Calcul du salaire</h2>
+    
+    <form method="POST" action="">
+        <label>Nom de l'employé :</label><br>
+        <input type="text" name="nom" required><br><br>
+        
+        <label>Nombre d'heures travaillées :</label><br>
+        <input type="number" name="heures" step="0.01" required><br><br>
+        
+        <label>Tarif horaire (FCFA) :</label><br>
+        <input type="number" name="tarif" step="0.01" required><br><br>
+        
+        <button type="submit">Calculer</button>
+    </form>
+
+    <hr>
+    <?php echo $message; ?>
+</body>
+</html>
